@@ -12,3 +12,4 @@ cryptography
 numpy
 huggingface_hub
 openpyxl
+pgvector
