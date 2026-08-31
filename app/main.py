@@ -1,32 +1,20 @@
-
-
-from fastapi import FastAPI
-from sqlalchemy import text
-from app.core.database import engine
-from app.services.embedding_service import create_embedding
-
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import Depends
+from sqlalchemy import text
 
 from app.core.auth import get_current_tenant
-
-from api.index import app
-
-# from contextlib import asynccontextmanager
-# from app.services.embedding_service import get_model
-
-
-from app.routes.products import router as products_router
-from app.routes.product_base import router as product_base_router
-from app.routes.import_job import router as import_job_router
+from app.core.database import engine
 from app.routes.api_key import router as api_key_router
-
+from app.routes.import_job import router as import_job_router
+from app.routes.product_base import router as product_base_router
+from app.routes.products import router as products_router
 from app.routes.v1.products import router as product_v1_router
 
-# app = FastAPI(
-#     title="ProductBase API",
-#     # lifespan=lifespan,
-# )
+
+app = FastAPI(
+    title="ProductBase API",
+)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -38,15 +26,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def root():
-   
     return {
         "message": "ProductBase API is running"
     }
 
+
 @app.get("/db-test")
-def database_test():    
+def database_test():
     with engine.connect() as connection:
         result = connection.execute(
             text("SELECT 1")
@@ -57,14 +46,14 @@ def database_test():
         }
 
 
-
 @app.get("/tenant-test")
 def tenant_test(
-    tenant_id = Depends(get_current_tenant),
+    tenant_id=Depends(get_current_tenant),
 ):
     return {
         "tenant_id": str(tenant_id)
     }
+
 
 app.include_router(products_router)
 app.include_router(product_base_router)
