@@ -10,6 +10,8 @@ from fastapi import Depends
 
 from app.core.auth import get_current_tenant
 
+from api.index import app
+
 # from contextlib import asynccontextmanager
 # from app.services.embedding_service import get_model
 
@@ -21,21 +23,10 @@ from app.routes.api_key import router as api_key_router
 
 from app.routes.v1.products import router as product_v1_router
 
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     print("Loading embedding model...")
-
-#     get_model()
-
-#     print("Embedding model loaded.")
-
-#     yield
-
-
-app = FastAPI(
-    title="ProductBase API",
-    # lifespan=lifespan,
-)
+# app = FastAPI(
+#     title="ProductBase API",
+#     # lifespan=lifespan,
+# )
 
 app.add_middleware(
     CORSMiddleware,
