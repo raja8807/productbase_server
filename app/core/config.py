@@ -13,6 +13,8 @@ class Settings(BaseSettings):
 
     HF_TOKEN:str
 
+    FE_URL:str
+
     class Config:
         env_file = ".env"
 

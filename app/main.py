@@ -9,6 +9,7 @@ from app.routes.import_job import router as import_job_router
 from app.routes.product_base import router as product_base_router
 from app.routes.products import router as products_router
 from app.routes.v1.products import router as product_v1_router
+from app.core.config import settings
 
 
 app = FastAPI(
@@ -20,6 +21,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
+        settings.FE_URL
     ],
     allow_credentials=True,
     allow_methods=["*"],
