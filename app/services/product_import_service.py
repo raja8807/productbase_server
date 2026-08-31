@@ -1,11 +1,14 @@
+
 from io import BytesIO
 from decimal import Decimal
-
+from uuid import UUID
 from openpyxl import load_workbook
 from sqlalchemy.orm import Session
 
 from app.models.product import Product
 from app.services.embedding_service import get_model
+from app.schema.product_schema import ProductCreatePayload
+from app.services.product_base_service import get_product_base
 
 
 REQUIRED_COLUMNS = [
@@ -52,6 +55,16 @@ def build_searchable_text(product: dict) -> str:
         ]
     )
 
+def build_searchable_text_from_playload(product: ProductCreatePayload) -> str:
+    return "\n".join(
+        [
+            f"Product: {product.name or ''}",
+            f"Description: {product.description or ''}",
+            f"Category: {product.category or ''}",
+            f"Brand: {product.brand or ''}",
+            f"Keywords: {product.tags or ''}",
+        ]
+    )
 
 def read_excel(file_bytes: bytes) -> list[dict]:
     workbook = load_workbook(
@@ -177,6 +190,55 @@ def validate_products(products: list[dict]) -> list[dict]:
 
     return errors
 
+def create_product(
+    db: Session,
+    tenant_id: UUID,
+    product: ProductCreatePayload,
+):
+    try:
+        product_base = get_product_base(
+            db=db,
+            tenant_id=tenant_id,
+        )
+
+        model = get_model()
+
+        searchable_text = build_searchable_text_from_playload(product)
+
+        embedding = model.encode(
+            searchable_text,
+            show_progress_bar=False,
+        ).tolist()
+
+        print(product)
+
+        db_product = Product(
+            tenant_id=tenant_id,
+            product_base_id=product_base.id,
+            product_id=product.product_id,
+            sku=product.sku,
+            name=product.name,
+            description=product.description,
+            category=product.category,
+            brand=product.brand,
+            price=product.price,
+            currency=product.currency,
+            availability=product.availability,
+            tags=product.tags,
+            image_url=product.image_url,
+            searchable_text=searchable_text,
+            embedding=embedding,
+        )
+
+        db.add(db_product)
+        db.commit()
+        db.refresh(db_product)
+
+        return db_product
+
+    except Exception:
+        db.rollback()
+        raise   
 
 def import_products(
     db: Session,
@@ -317,6 +379,8 @@ def process_import_job(
             )
         ):
             db_product = Product(
+                
+                
                 tenant_id=tenant_id,
                 product_base_id=product_base_id,
                 product_id=product["product_id"],

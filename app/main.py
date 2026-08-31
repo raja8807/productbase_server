@@ -17,6 +17,9 @@ from app.services.embedding_service import get_model
 from app.routes.products import router as products_router
 from app.routes.product_base import router as product_base_router
 from app.routes.import_job import router as import_job_router
+from app.routes.api_key import router as api_key_router
+
+from app.routes.v1.products import router as product_v1_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -75,3 +78,9 @@ def tenant_test(
 app.include_router(products_router)
 app.include_router(product_base_router)
 app.include_router(import_job_router)
+app.include_router(api_key_router)
+
+app.include_router(
+    product_v1_router,
+    prefix="/api/v1",
+)

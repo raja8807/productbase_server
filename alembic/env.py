@@ -11,6 +11,7 @@ from app.models.tenant import Tenant
 from app.models.product_base import ProductBase
 from app.models.product import Product
 from app.models.import_job import ImportJob
+from app.models.api_key import ApiKey
 
 from dotenv import load_dotenv
 import os
