@@ -6,7 +6,8 @@ alembic
 pydantic
 pydantic-settings
 python-multipart
+python-dotenv
 PyJWT
 cryptography
-sentence-transformers
 numpy
+huggingface_hub

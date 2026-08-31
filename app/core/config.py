@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     SUPABASE_JWT_X: str
     SUPABASE_JWT_Y: str
 
+    HF_TOKEN:str
+
     class Config:
         env_file = ".env"
 

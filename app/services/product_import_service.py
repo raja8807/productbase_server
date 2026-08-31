@@ -6,7 +6,7 @@ from openpyxl import load_workbook
 from sqlalchemy.orm import Session
 
 from app.models.product import Product
-from app.services.embedding_service import get_model
+from app.services.embedding_service import create_embedding
 from app.schema.product_schema import ProductCreatePayload
 from app.services.product_base_service import get_product_base
 
@@ -201,14 +201,19 @@ def create_product(
             tenant_id=tenant_id,
         )
 
-        model = get_model()
+        # model = get_model()
 
         searchable_text = build_searchable_text_from_playload(product)
 
-        embedding = model.encode(
-            searchable_text,
-            show_progress_bar=False,
-        ).tolist()
+        # NEW
+        searchable_text = build_searchable_text_from_playload(product)
+
+        embedding = create_embedding(searchable_text)
+
+        # embedding = model.encode(
+        #     searchable_text,
+        #     show_progress_bar=False,
+        # ).tolist()
 
         print(product)
 
@@ -257,18 +262,17 @@ def import_products(
             "imported": 0,
         }
 
-    model = get_model()
+    
 
     searchable_texts = [
         build_searchable_text(product)
         for product in products
     ]
 
-    embeddings = model.encode(
-        searchable_texts,
-        batch_size=32,
-        show_progress_bar=False,
-    )
+    embeddings = [
+        create_embedding(text)
+        for text in searchable_texts
+    ]
 
     db_products = []
 
@@ -292,7 +296,7 @@ def import_products(
             tags=product.get("tags"),
             image_url=product.get("image_url"),
             searchable_text=searchable_text,
-            embedding=embedding.tolist(),
+            embedding=embedding,
         )
 
         db_products.append(db_product)
@@ -356,14 +360,12 @@ def process_import_job(
             for product in products
         ]
 
-        # Generate embeddings in batches
-        model = get_model()
+    
 
-        embeddings = model.encode(
-            searchable_texts,
-            batch_size=32,
-            show_progress_bar=False,
-        )
+        embeddings = [
+    create_embedding(text)
+    for text in searchable_texts
+]
 
         db_products = []
 
@@ -395,7 +397,7 @@ def process_import_job(
                 tags=product.get("tags"),
                 image_url=product.get("image_url"),
                 searchable_text=searchable_text,
-                embedding=embedding.tolist(),
+                embedding=embedding,
             )
 
             db_products.append(db_product)
